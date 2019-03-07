@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.421
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "geenomics", "geenomics\geenomics.vcxproj", "{4A623512-D2C0-4BD0-9A7C-6071B3C62C27}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4A623512-D2C0-4BD0-9A7C-6071B3C62C27}.Debug|x64.ActiveCfg = Debug|x64
+		{4A623512-D2C0-4BD0-9A7C-6071B3C62C27}.Debug|x64.Build.0 = Debug|x64
+		{4A623512-D2C0-4BD0-9A7C-6071B3C62C27}.Debug|x86.ActiveCfg = Debug|Win32
+		{4A623512-D2C0-4BD0-9A7C-6071B3C62C27}.Debug|x86.Build.0 = Debug|Win32
+		{4A623512-D2C0-4BD0-9A7C-6071B3C62C27}.Release|x64.ActiveCfg = Release|x64
+		{4A623512-D2C0-4BD0-9A7C-6071B3C62C27}.Release|x64.Build.0 = Release|x64
+		{4A623512-D2C0-4BD0-9A7C-6071B3C62C27}.Release|x86.ActiveCfg = Release|Win32
+		{4A623512-D2C0-4BD0-9A7C-6071B3C62C27}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A2F6C26B-B2DB-4212-A19F-8BE4EA15B69D}
+	EndGlobalSection
+EndGlobal
