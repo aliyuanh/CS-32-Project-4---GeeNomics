@@ -118,6 +118,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="provided.h" />
+    <ClInclude Include="Trie.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Genome.cpp" />
+    <ClCompile Include="GenomeMatcher.cpp" />
+    <ClCompile Include="runntThing.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Text.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
