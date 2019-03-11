@@ -61,7 +61,7 @@ bool GenomeMatcherImpl::findGenomesWithThisDNA(const string& fragment, int minim
 	vector<DNAMatch> possibleMatches;
 	//find a match from the start of the fragment
 	string firstSegment = fragment.substr(0, m_minSearchLength);
-	vector<DNAMatch> matchesToFirst = myTrie.find(firstSegment, false);
+	vector<DNAMatch> matchesToFirst = myTrie.find(firstSegment, exactMatchOnly);
 	vector<Genome> matchingGenomes;
 	vector<int> matchingPositions;
 	vector<string> matchingStrings;
@@ -123,11 +123,20 @@ bool GenomeMatcherImpl::findGenomesWithThisDNA(const string& fragment, int minim
 			}
 		}
 	}
+	
+	for (int i = 1; i < actualMatches.size(); ) {
+		if (actualMatches[i - 1].genomeName == actualMatches[i].genomeName) {
+			actualMatches.erase(actualMatches.begin()+i);
+			i=1;
+		}
+		else {
+			i++;
+		}
+	}
 	cout << actualMatches.size() << " actual matches" << endl;
 	for (int i = 0; i < actualMatches.size(); i++) {
-		cout << actualMatches[i].genomeName << " at "<<actualMatches[i].position << endl;
+		cout << actualMatches[i].genomeName << " at " << actualMatches[i].position << endl;
 	}
-
 	if (actualMatches.size() == 0) {
 		cout << "ouch. no matches. what a rough time" << endl;
 		return false;

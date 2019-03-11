@@ -32,16 +32,16 @@ private:
 
 template<typename ValueType>
 Trie<ValueType>::Trie() {
-	std::cout << "making a Trie" << std::endl;
+	//std::cout << "making a Trie" << std::endl;
 	root = new Node;
 }
 
 template<typename ValueType>
 Trie<ValueType>::~Trie() {
-	printTrie(root);
+	//printTrie(root);
 	freeTree(root);
 	//printTrie(root);
-	std::cout << "gettin ridda a Trie" << std::endl;
+	//std::cout << "gettin ridda a Trie" << std::endl;
 }
 template<typename ValueType>
 void Trie<ValueType>::reset() {
@@ -119,6 +119,7 @@ void Trie<ValueType>::insert(const std::string & key, const ValueType & value)
 template<typename ValueType>
 std::vector<ValueType> Trie<ValueType>::find(const std::string & key, bool exactMatchOnly) const
 {
+	//BUG: if exactMatchOnly is true AND there is an exact match, it makes duplicates :( 
 	//TODO 
 	Node* temp = root;
 	std::vector<ValueType> toReturn;
@@ -140,6 +141,7 @@ std::vector<ValueType> Trie<ValueType>::find(const std::string & key, bool exact
 							extra = find(key.substr(0, i) + temp->kids[k]->label + key.substr(i + 1), true);
 							if (!extra.empty()) {
 								for (int r = 0; r < extra.size(); r++) {
+									std::cout << "adding an extra!" << std::endl;
 									toReturn.push_back(extra[r]);
 								}
 							}
@@ -147,21 +149,6 @@ std::vector<ValueType> Trie<ValueType>::find(const std::string & key, bool exact
 
 
 					}
-					//if there are other possible paths and the checker is fale
-					//add them
-					/*
-					if (exactMatchOnly) {
-						continue;
-					}
-					std::vector<ValueType> extra;
-					for (int k = j+1; k < temp->kids.size(); k++) {
-						extra = find(key.substr(0, i) + temp->kids[j]->label + key.substr(i + 1), false);
-						for (int h = 0; h < extra.size(); h++) {
-							std::cout << "adding extras" << std::endl;
-							toReturn.push_back(extra[h]);
-						}
-					}
-					*/
 				}
 			}
 			
@@ -193,16 +180,20 @@ std::vector<ValueType> Trie<ValueType>::find(const std::string & key, bool exact
 
 		}
 	}
-//	for (std::list<ValueType>::iterator it = temp->vals.begin(); it != temp->vals.end(); it++) {
-		//toReturn.push_back(*it);
-	//}
-	//typename std::list<ValueType>::iterator cry;// ::iterator cry; = temp->valsToStore.begin();
+	//adds all the perfect matches 
 	for (typename std::list<ValueType>::iterator cry = temp->valsToStore.begin(); cry != temp->valsToStore.end(); cry++) {
 		toReturn.push_back(*cry);
-		
 	}
+	//now, get rid of duplicates
+	//for (int p = 1; p < toReturn.size(); p++) {
+		//std::cout << "gettin rid of dupes" << std::endl;
+		
+	//}
+
+	//make a vector of names
+	//make a vector of corresponding positions
+
 	std::cout << "there are " << toReturn.size() << " total matches" << std::endl;
-	
 	return toReturn;
 }
 #endif // TRIE_INCLUDED
