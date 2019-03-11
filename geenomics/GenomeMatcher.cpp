@@ -99,11 +99,22 @@ bool GenomeMatcherImpl::findGenomesWithThisDNA(const string& fragment, int minim
 				cout << "an exact match to the fragment has been found in " << matchingGenomes[i].name() << " at position " << matchingPositions[i] << endl;
 				actualMatches.push_back(matchesToFirst[i]);
 			}
+			else {
+				for (int k = 0; k < minimumLength; k++) {
+					if (matchingStrings[i][k] != fragment[k]) {
+						break;
+					}
+					if (k == minimumLength - 1) {
+						actualMatches.push_back(matchesToFirst[i]);
+					}
+				}
+			}
 		}
 		else {
 			//can only have one mismatch! if one or less, push to the actual matches
 			//else, don't push 
 			int numOff = 0;
+			string toPush = "";
 			//if fragmentOfThis is blank, that means there wasn't a long enough segment, so skip
 			cout << matchingStrings[i]<<endl;
 			for (int k = 0; k < fragment.length(); k++) {
@@ -111,22 +122,67 @@ bool GenomeMatcherImpl::findGenomesWithThisDNA(const string& fragment, int minim
 					numOff = 100;
 					continue;
 				}
+				toPush += matchingStrings[i][k];
 				if (fragment[k] != matchingStrings[i][k]) {
-					numOff++;
+					if (numOff == 1) {
+						break;
+					}
+					if (exactMatchOnly) {
+						break;
+					}
+					else {
+						numOff++;
+					}
 				}
 			}
-			if (numOff <= 1) {
+			if (numOff <= 1 && toPush.length() >= minimumLength) {
+				std::cout << "adding to the actual matches" << endl;
 				actualMatches.push_back(matchesToFirst[i]);
 			}
 			else {
-				cout << matchingStrings[i] << " is too diff from " << fragment << endl;
+				cout << matchingStrings[i] << " is too diff from \n" << fragment << endl;
 			}
 		}
 	}
 	
 	for (int i = 1; i < actualMatches.size(); ) {
+		//check with the others 
 		if (actualMatches[i - 1].genomeName == actualMatches[i].genomeName) {
-			actualMatches.erase(actualMatches.begin()+i);
+			//now use the one with the longer length 
+			int firstMatchingLength = 0;
+			int secondMatchingLength = 0;
+			//find the length of the first one
+			for (int j = 0; j < fragment.size(); j++) {
+				if (matchingStrings[i - 1][j] == fragment[j]) {
+					firstMatchingLength++;
+				}
+				else {
+					break;
+				}
+			}
+			//find the length of the second one 
+			for (int j = 0; j < fragment.size(); j++) {
+				if (matchingStrings[i][j] == fragment[j]) {
+					secondMatchingLength++;
+				}
+				else {
+					break;
+				}
+			}
+			if (firstMatchingLength > secondMatchingLength) {
+				actualMatches.erase(actualMatches.begin() + i);
+				matchingStrings.erase(matchingStrings.begin() + i);
+			}
+			else if(secondMatchingLength>firstMatchingLength){
+				actualMatches.erase(actualMatches.begin() + i-1);
+				matchingStrings.erase(matchingStrings.begin() + i-1);
+			}
+			else {
+				actualMatches.erase(actualMatches.begin() + i);
+				matchingStrings.erase(matchingStrings.begin() + i);
+			}
+			//actualMatches.erase(actualMatches.begin() + i);
+			//matchingStrings.erase(actualMatches.begin() + i);
 			i=1;
 		}
 		else {
