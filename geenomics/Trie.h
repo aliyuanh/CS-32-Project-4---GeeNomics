@@ -40,7 +40,7 @@ template<typename ValueType>
 Trie<ValueType>::~Trie() {
 	printTrie(root);
 	freeTree(root);
-	printTrie(root);
+	//printTrie(root);
 	std::cout << "gettin ridda a Trie" << std::endl;
 }
 template<typename ValueType>
@@ -129,7 +129,42 @@ std::vector<ValueType> Trie<ValueType>::find(const std::string & key, bool exact
 					temp = temp->kids[j];
 					std::cout << key[i] << " matches" << std::endl;
 				}
+				else {
+					if (!exactMatchOnly) {
+						std::vector<ValueType> extra;
+						for (int k = 0; k < temp->kids.size(); k++) {
+							if (k == j) {
+								continue;
+							}
+							std::cout << "checking alternates: " << key.substr(0, i) + temp->kids[k]->label + key.substr(i + 1)<<std::endl;
+							extra = find(key.substr(0, i) + temp->kids[k]->label + key.substr(i + 1), true);
+							if (!extra.empty()) {
+								for (int r = 0; r < extra.size(); r++) {
+									toReturn.push_back(extra[r]);
+								}
+							}
+						}
+
+
+					}
+					//if there are other possible paths and the checker is fale
+					//add them
+					/*
+					if (exactMatchOnly) {
+						continue;
+					}
+					std::vector<ValueType> extra;
+					for (int k = j+1; k < temp->kids.size(); k++) {
+						extra = find(key.substr(0, i) + temp->kids[j]->label + key.substr(i + 1), false);
+						for (int h = 0; h < extra.size(); h++) {
+							std::cout << "adding extras" << std::endl;
+							toReturn.push_back(extra[h]);
+						}
+					}
+					*/
+				}
 			}
+			
 			
 		}
 		else {
@@ -137,18 +172,19 @@ std::vector<ValueType> Trie<ValueType>::find(const std::string & key, bool exact
 				if (i == 0) {
 					return toReturn;
 				}
-
 				std::vector<ValueType> fromKids;
 				for (int j = 0; j < temp->kids.size(); j++) {
 					//does not work if at the end 
 					std::cout << "alternate: " << std::endl;
 					std::cout << key.substr(0, i) << temp->kids[j]->label << key.substr(i + 1) << std::endl;
 					//if the key is off by one, test all its children paths with an exact match while replacing that character 
-
 					fromKids = find(key.substr(0, i) + temp->kids[j]->label + key.substr(i + 1), true);
 					if (!fromKids.empty()) {
 						//std::cout << "is not empty!" << std::endl;
-						toReturn = fromKids;
+						//toReturn = fromKids;
+						for (int f = 0; f < fromKids.size(); f++) {
+							toReturn.push_back(fromKids[f]);
+						}
 					}
 				}
 				return toReturn;
@@ -163,7 +199,10 @@ std::vector<ValueType> Trie<ValueType>::find(const std::string & key, bool exact
 	//typename std::list<ValueType>::iterator cry;// ::iterator cry; = temp->valsToStore.begin();
 	for (typename std::list<ValueType>::iterator cry = temp->valsToStore.begin(); cry != temp->valsToStore.end(); cry++) {
 		toReturn.push_back(*cry);
+		
 	}
+	std::cout << "there are " << toReturn.size() << " total matches" << std::endl;
+	
 	return toReturn;
 }
 #endif // TRIE_INCLUDED

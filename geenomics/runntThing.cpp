@@ -6,6 +6,7 @@
 #include <vector>
 using namespace std;
 int main() {
+	/*
 	Trie<int> trie;
 	trie.insert("atcgg", 5);
 	trie.insert("atgg", 2);
@@ -22,7 +23,7 @@ int main() {
 
 	trie.reset();
 	trie.insert("atg",2);
-	/*
+	
 	string filename = "C:\\Users\\aliyu\\source\\repos\\geenomics\\geenomics\\data\\Halorubrum_chaoviator.txt";
 	ifstream strm(filename);
 	if (!strm) {
@@ -34,13 +35,15 @@ int main() {
 	if (success) {
 		cout << "Loaded	" << vg.size() << "	genomes	successfully:" << endl;			
 		for (int k = 0; k != vg.size(); k++) {
-			cout << vg[k].name() << endl;
-			cout << vg[k].length() << endl;
+			//cout << vg[k].name() << endl;
+			//cout << vg[k].length() << endl;
 		}
 	}
 	else {
 		cout << "Error loading genome data";
 	}
+	GenomeMatcher gee(4);
+	gee.addGenome(vg[0]);
 	*/
 	/*
 	
@@ -67,7 +70,7 @@ int main() {
 	*/
 
 
-
+	/*
 	Genome	g("oryx", "GCTCGGNACACATCCGCCGCGGACGGGACGGGATTCGGGCTGTCGATTGTCTCACAGATCGTCGACGTACATGACTGGGA");
 	string	f1, f2, f3;		
 	bool	result1 = g.extract(0, 5, f1);		//	result1	=	true,	f1	=	“GCTCG”;		
@@ -96,13 +99,21 @@ int main() {
 	else {
 		cout << "bad" << endl;
 	}
-	Genome g1("yay","ACTG");
-	Genome g2("yoot", "TCGACT");
-	Genome g3("yeet", "TCTCG");
+	*/
+	Genome g1("genome 1","ACTG");
+	Genome g2("genome 2", "TCGACT");
+	Genome g3("genome 3", "TCTCG");
 	GenomeMatcher geneMatcher(3);
 	geneMatcher.addGenome(g1);
 	geneMatcher.addGenome(g2);
 	geneMatcher.addGenome(g3);
-
+	vector<DNAMatch> genomeThatMatched;
+	geneMatcher.findGenomesWithThisDNA("CTAC",3,false,genomeThatMatched);
+	if (genomeThatMatched.empty()) {
+		cout << "no matchero" << endl;
+	}
+	else {
+		cout << "The first match is from " << genomeThatMatched[0].genomeName << " at position " << genomeThatMatched[0].position << std::endl;
+	}
 	return 0;
 }

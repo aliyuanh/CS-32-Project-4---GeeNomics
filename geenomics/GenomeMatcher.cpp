@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include "Trie.h"
+#include <map>
 #include <algorithm>
 using namespace std;
 
@@ -48,10 +49,96 @@ int GenomeMatcherImpl::minimumSearchLength() const
 	return m_minSearchLength;  // This compiles, but may not be correct
 }
 
+
 bool GenomeMatcherImpl::findGenomesWithThisDNA(const string& fragment, int minimumLength, bool exactMatchOnly, vector<DNAMatch>& matches) const
 {
-	int startPos = 0;
-	return false;  // This compiles, but may not be correct
+	if (fragment.size() < minimumLength) {
+		return false;
+	}
+	if (minimumLength < m_minSearchLength) {
+		return false;
+	}
+	vector<DNAMatch> possibleMatches;
+	//find a match from the start of the fragment
+	string firstSegment = fragment.substr(0, m_minSearchLength);
+	vector<DNAMatch> matchesToFirst = myTrie.find(firstSegment, false);
+	vector<Genome> matchingGenomes;
+	vector<int> matchingPositions;
+	vector<string> matchingStrings;
+	if (!matchesToFirst.empty()) {
+		//std::cout << "we found "<< matchesToFirst.size()<<" matches!" << std::endl;
+		for (int i = 0; i < matchesToFirst.size(); i++) {
+			string nameToMatch = matchesToFirst[i].genomeName;
+			int posToMatch = matchesToFirst[i].position;
+			//cout << nameToMatch << " at pos " << posToMatch << endl;
+			for (int j = 0; j < myGenomes.size(); j++) {
+				if (myGenomes[j].name() == nameToMatch) {
+					matchingGenomes.push_back(myGenomes[j]);
+					matchingPositions.push_back(posToMatch);
+					break;
+				}
+			}
+		}
+	}
+	else {
+		std::cout << "no matches found :(" << std::endl;
+	}
+	cout << "there are " << matchingGenomes.size() << " possible bois" << endl;
+	for (int i = 0; i < matchingGenomes.size(); i++) {
+		//for each genome, make a string for the length of the fragment 
+		string fragmentOfThis = "";
+		matchingGenomes[i].extract(matchingPositions[i], fragment.length(), fragmentOfThis);
+		cout << fragmentOfThis << endl;
+		matchingStrings.push_back(fragmentOfThis);
+	}
+	//go thru the rest of the genome to see if it matches 
+	vector<DNAMatch> actualMatches;
+	for (int i = 0; i < matchingStrings.size(); i++) {
+		if (exactMatchOnly) {
+			if (matchingStrings[i] == fragment) {
+				cout << "an exact match to the fragment has been found in " << matchingGenomes[i].name() << " at position " << matchingPositions[i] << endl;
+				actualMatches.push_back(matchesToFirst[i]);
+			}
+		}
+		else {
+			//can only have one mismatch! if one or less, push to the actual matches
+			//else, don't push 
+			int numOff = 0;
+			//if fragmentOfThis is blank, that means there wasn't a long enough segment, so skip
+			cout << matchingStrings[i]<<endl;
+			for (int k = 0; k < fragment.length(); k++) {
+				if (matchingStrings[i] == "") {
+					numOff = 100;
+					continue;
+				}
+				if (fragment[k] != matchingStrings[i][k]) {
+					numOff++;
+				}
+			}
+			if (numOff <= 1) {
+				actualMatches.push_back(matchesToFirst[i]);
+			}
+			else {
+				cout << matchingStrings[i] << " is too diff from " << fragment << endl;
+			}
+		}
+	}
+	cout << actualMatches.size() << " actual matches" << endl;
+	for (int i = 0; i < actualMatches.size(); i++) {
+		cout << actualMatches[i].genomeName << " at "<<actualMatches[i].position << endl;
+	}
+
+	if (actualMatches.size() == 0) {
+		cout << "ouch. no matches. what a rough time" << endl;
+		return false;
+	}
+	else {
+		matches.push_back(actualMatches[0]);
+		return true;
+	}
+	//now, go thru each string to see if it's an exact match.
+	//if it's an exact match, hooray! if it's off by one, use exactMatchOnly 
+	//return false;  // This compiles, but may not be correct
 }
 
 bool GenomeMatcherImpl::findRelatedGenomes(const Genome& query, int fragmentMatchLength, bool exactMatchOnly, double matchPercentThreshold, vector<GenomeMatch>& results) const
