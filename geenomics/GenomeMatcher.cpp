@@ -279,7 +279,7 @@ bool GenomeMatcherImpl::findGenomesWithThisDNA(const string& fragment, int minim
 					}
 					//cout << "existing length is " << existingLength << endl;
 					//cout << "new length is " << newLength << endl;
-					if (newLength > existingLength) {
+					if (newLength > existingLength && newLength >= minimumLength) {
 						//erase!
 						
 						actualMatches.erase(actualMatches.begin() + indexOfExists);

@@ -22,9 +22,9 @@ int main() {
 	//result = matchBoi.findGenomesWithThisDNA("GAAG", 4, true, matches);//YE
 	//result = matchBoi.findGenomesWithThisDNA("GAATAC", 4, true, matches);//YE
 	//result = matchBoi.findGenomesWithThisDNA("GAATAC", 6, true, matches);//YE
-	//result = matchBoi.findGenomesWithThisDNA("GAATAC", 6, false, matches);//NAH
-	result = matchBoi.findGenomesWithThisDNA("GTATAT", 6, false, matches);//YE
-	//result = matchBoi.findGenomesWithThisDNA("GAATACG", 6, false, matches); //OOF//one extra??//NAH
+	//result = matchBoi.findGenomesWithThisDNA("GAATAC", 6, false, matches);//YE
+	//result = matchBoi.findGenomesWithThisDNA("GTATAT", 6, false, matches);//YE
+	//result = matchBoi.findGenomesWithThisDNA("GAATACG", 6, false, matches); YE
 	//result = matchBoi.findGenomesWithThisDNA("GAAGGGTT", 4, false, matches);//uh close?
 	//result = matchBoi.findGenomesWithThisDNA("GAAGGGTT", 5, false, matches);//uh close?
 	//result = matchBoi.findGenomesWithThisDNA("ACGTGCGAGACTTAGAGCC", 12, false, matches);//NAH
