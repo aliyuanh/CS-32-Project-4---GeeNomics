@@ -128,7 +128,7 @@ std::vector<ValueType> Trie<ValueType>::find(const std::string & key, bool exact
 			for (int j = 0; j < temp->kids.size(); j++) {
 				if (temp->kids[j]->label == key[i]) {
 					temp = temp->kids[j];
-					std::cout << key[i] << " matches" << std::endl;
+					//std::cout << key[i] << " matches" << std::endl;
 				}
 				else {
 					if (!exactMatchOnly) {
@@ -137,11 +137,11 @@ std::vector<ValueType> Trie<ValueType>::find(const std::string & key, bool exact
 							if (k == j) {
 								continue;
 							}
-							std::cout << "checking alternates: " << key.substr(0, i) + temp->kids[k]->label + key.substr(i + 1)<<std::endl;
+							//std::cout << "checking alternates: " << key.substr(0, i) + temp->kids[k]->label + key.substr(i + 1)<<std::endl;
 							extra = find(key.substr(0, i) + temp->kids[k]->label + key.substr(i + 1), true);
 							if (!extra.empty()) {
 								for (int r = 0; r < extra.size(); r++) {
-									std::cout << "adding an extra!" << std::endl;
+									//std::cout << "adding an extra!" << std::endl;
 									toReturn.push_back(extra[r]);
 								}
 							}
@@ -193,7 +193,7 @@ std::vector<ValueType> Trie<ValueType>::find(const std::string & key, bool exact
 	//make a vector of names
 	//make a vector of corresponding positions
 
-	std::cout << "there are " << toReturn.size() << " total matches" << std::endl;
+	//std::cout << "there are " << toReturn.size() << " total matches" << std::endl;
 	return toReturn;
 }
 #endif // TRIE_INCLUDED

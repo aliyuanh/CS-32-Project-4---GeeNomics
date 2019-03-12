@@ -19,15 +19,14 @@ int main() {
 	//result = matchBoi.findGenomesWithThisDNA("GAAG", 4, true, matches);
 	//result = matchBoi.findGenomesWithThisDNA("GAATAC", 4, true, matches);
 	//result = matchBoi.findGenomesWithThisDNA("GAATAC", 6, true, matches);
-	//result = matchBoi.findGenomesWithThisDNA("GAATAC", 6, false, matches);
-	//result = matchBoi.findGenomesWithThisDNA("GTATAT", 6, false, matches);
-	//result = matchBoi.findGenomesWithThisDNA("GTATAT", 6, false, matches);
-	//result = matchBoi.findGenomesWithThisDNA("GAATACG", 6, false, matches);
+	//result = matchBoi.findGenomesWithThisDNA("GAATAC", 6, false, matches);//one extra??
+	result = matchBoi.findGenomesWithThisDNA("GTATAT", 6, false, matches);
+	//result = matchBoi.findGenomesWithThisDNA("GAATACG", 6, false, matches); //OOF//one extra??
 	//result = matchBoi.findGenomesWithThisDNA("GAAGGGTT", 4, false, matches);
 	//result = matchBoi.findGenomesWithThisDNA("GAAGGGTT", 5, false, matches);
 	//result = matchBoi.findGenomesWithThisDNA("ACGTGCGAGACTTAGAGCC", 12, false, matches);
-	result = matchBoi.findGenomesWithThisDNA("GAAG", 3, true, matches);
-	result = matchBoi.findGenomesWithThisDNA("GAAG", 5, true, matches);
+	//result = matchBoi.findGenomesWithThisDNA("GAAG", 3, true, matches);
+	//result = matchBoi.findGenomesWithThisDNA("GAAG", 5, true, matches);
 }
 
 
@@ -244,7 +243,7 @@ void loadOneDataFile(GenomeMatcher* library)
 		return;
 	}
 	vector<Genome> genomes;
-	if (!loadFile(filename, genomes))
+	if (!loadFile(PROVIDED_DIR + "/" + filename, genomes))
 		return;
 	for (const auto& g : genomes)
 		library->addGenome(g);
@@ -372,7 +371,7 @@ void findRelatedGenomesFromFile(GenomeMatcher* library)
 		return;
 	}
 	vector<Genome> genomes;
-	if (!loadFile(filename, genomes))
+	if (!loadFile(PROVIDED_DIR + "/" +filename, genomes))
 		return;
 	double pctThreshold;
 	bool exactMatchOnly;
