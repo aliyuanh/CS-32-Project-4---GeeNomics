@@ -191,20 +191,17 @@ bool GenomeMatcherImpl::findGenomesWithThisDNA(const string& fragment, int minim
 			//else, don't push 
 			int numOff = 0;
 			string toPush = "";
-			cout << matchingStrings[i] << endl;
+			//cout << matchingStrings[i] << endl;
 			//if fragmentOfThis is blank, that means there wasn't a long enough segment, so skip
 			for (int k = 0; k < fragment.length(); k++) {
 				if (matchingStrings[i] == "") {
 					numOff = 100;
 					continue;
 				}
-				toPush += matchingStrings[i][k];
 
 				if (fragment[k] != matchingStrings[i][k]) {
 					if (numOff == 1) {
-						//cout << "too many changeroonies" << matchingStrings[i] << endl;
-						//numOff++;
-						continue;
+						break;
 					}
 					if (exactMatchOnly) {
 						break;
@@ -213,7 +210,7 @@ bool GenomeMatcherImpl::findGenomesWithThisDNA(const string& fragment, int minim
 						numOff++;
 					}
 				}
-
+				toPush += matchingStrings[i][k];
 			}
 			if (numOff <= 1 && toPush.length() >= minimumLength) {
 				//std::cout << "adding to the actual matches " <<matchingStrings[i]<< endl;
@@ -221,46 +218,73 @@ bool GenomeMatcherImpl::findGenomesWithThisDNA(const string& fragment, int minim
 				//TODO 				//check for if a DNAmatch with the same genomeName exists already
 				bool alreadyExists = false;
 				int indexOfExists = 0;
+				int indexInMatches = 0;
 				for (int p = 0; p < actualMatches.size(); p++) {
 					if (actualMatches[p].genomeName == matchesToFirst[i].genomeName) {
 						alreadyExists = true;
 						indexOfExists = p;
 					}
-					//cout << "NAME IS" << endl;
-					cout << actualMatches[p].genomeName << endl;
+					//cout << actualMatches[p].genomeName << endl;
+
+					//find the correct index in matchingStrings and matchingPositions
+					for (int y = 0; y < matchingStrings.size(); y++) {
+						if (matchesToFirst[y].genomeName == actualMatches[indexOfExists].genomeName && matchesToFirst[y].position == actualMatches[indexOfExists].position) {
+							indexInMatches = y;
+						}
+					}
+					//std::cout << "the index in the matches is " << indexInMatches << "______________________________" << endl;
+					//cout << "WHICH have the name " << matchesToFirst[indexInMatches].genomeName << " with position " << matchesToFirst[indexInMatches].position << endl;
+
+
+
 				}
 				if (!alreadyExists) {
 					actualMatches.push_back(matchesToFirst[i]);
 				}
 				else {
+					//find the correct string to actually compare to??? 
+					//first, find the right genome by name
+					//then, extract the string of fragment length? 
+					
 					//something already exists, so let's check lengths! 
 					int existingLength = 0;
 					int newLength = 0;
-					for (int h = 0; h < matchingStrings[indexOfExists].length(); h++) {
-						if (matchingStrings[indexOfExists][h] != fragment[h]) {
+					//this is not actually right, we need to use the correct matchingStrings 
+					//find which of the matchingStrings has the correct genome??? 
+					for (int h = 0; h < matchingStrings[indexInMatches].length(); h++) {
+						if (matchingStrings[indexInMatches][h] != fragment[h]) {
 							break;
 						}
 						else {
 							existingLength++;
 						}
 					}
-
+					int off = 0;
 					for (int h = 0; h < matchingStrings[i].length(); h++) {
 						if (matchingStrings[i][h] != fragment[h]) {
-							break;
+							if (off == 1) {
+								break;
+							}
+							off++;
+							//break;
 						}
 						else {
 							newLength++;
 						}
 					}
-					cout << "existing length is " << existingLength << endl;
-					cout << "new length is " << newLength << endl;
+					if (actualMatches[indexOfExists].genomeName == "Genome 3") {
+						cout << "the total length was " << matchingStrings[i].length() << " with a string of " << matchingStrings[i] << endl;
+						cout << "existing length is " << existingLength << endl;
+						cout << "new length is " << newLength << endl;
+					}
+					//cout << "existing length is " << existingLength << endl;
+					//cout << "new length is " << newLength << endl;
 					if (newLength > existingLength) {
 						//erase!
 						
 						actualMatches.erase(actualMatches.begin() + indexOfExists);
-						matchingStrings.erase(matchingStrings.begin() + indexOfExists);
-						//actualMatches.push_back(matchesToFirst[i]);
+						matchingStrings.erase(matchingStrings.begin() + indexInMatches);
+						actualMatches.push_back(matchesToFirst[i]);
 						//i = 0;
 					}
 					else {
@@ -269,7 +293,7 @@ bool GenomeMatcherImpl::findGenomesWithThisDNA(const string& fragment, int minim
 				}
 			}
 			else {
-				//cout << matchingStrings[i] << " is too diff from \n" << fragment << endl;
+				cout << matchingStrings[i] << " is too diff from \n" << fragment << endl;
 			}
 		}
 	}
@@ -289,11 +313,72 @@ bool GenomeMatcherImpl::findGenomesWithThisDNA(const string& fragment, int minim
 	//if it's an exact match, hooray! if it's off by one, use exactMatchOnly 
 	//return false;  // This compiles, but may not be correct
 }
-
+bool isGreaterThan(const GenomeMatch g1, const GenomeMatch g2)
+{
+	if (g1.percentMatch > g2.percentMatch) {
+		cout << "sortin" << endl;
+		return true;
+	}
+	else {
+		return false;
+	}
+}
 bool GenomeMatcherImpl::findRelatedGenomes(const Genome& query, int fragmentMatchLength, bool exactMatchOnly, double matchPercentThreshold, vector<GenomeMatch>& results) const
 {
+	cout << "in find related genomes" << endl;
+	if (fragmentMatchLength < m_minSearchLength) {
+		return false;
+	}
+	vector<GenomeMatch> toReturn(myGenomes.size());
+	//make one GenomeMatch for each Genome 
+	for (int i = 0; i < myGenomes.size(); i++) {
+		toReturn[i].genomeName = myGenomes[i].name();
+	}
+	int numMatches = 0;
+	vector<DNAMatch> fromHelper;
+	int numIterations = query.length() / fragmentMatchLength;
+	for (int i = 0; i < numIterations; i++) {
+		string help;
+		query.extract(i*fragmentMatchLength, fragmentMatchLength, help);
+		if (findGenomesWithThisDNA(help, fragmentMatchLength, exactMatchOnly, fromHelper)) {
+			//increment each toReturn genomeMatch if it's in fromHelper
+			for (int j = 0; j < fromHelper.size(); j++) {
+				//search for the right genomeMatch
+				for (int k = 0; k < toReturn.size(); k++) {
+					if (toReturn[k].genomeName == fromHelper[j].genomeName) {
+						toReturn[k].percentMatch++;
+						numMatches++;
+					}
+				}
+			}
+		}
+	}
+	cout << "num of matches per genome" << endl;
+	for (int i = 0; i < toReturn.size(); i++) {
+		cout << toReturn[i].genomeName << " with " << toReturn[i].percentMatch << " matches." << endl;
+	}
+	vector<GenomeMatch> atLeastOnce;
+	for (int i = 0; i < toReturn.size(); i++) {
+		if (toReturn[i].percentMatch > 0) {
+			GenomeMatch* yuh = new GenomeMatch;
+			yuh->genomeName = toReturn[i].genomeName;
+			yuh->percentMatch = 100*(toReturn[i].percentMatch / numIterations);
+			atLeastOnce.push_back(*yuh);
+		}
+	}
+	sort(atLeastOnce.begin(), atLeastOnce.end(), isGreaterThan);
+	for (int i = 0; i < atLeastOnce.size(); i++) {
+		cout << atLeastOnce[i].genomeName << " with the percent " << atLeastOnce[i].percentMatch << endl;
+	}
+
+	if (numMatches > 0) {
+		results = atLeastOnce;
+		return true;
+	}
 	return false;  // This compiles, but may not be correct
 }
+
+
 
 //******************** GenomeMatcher functions ********************************
 

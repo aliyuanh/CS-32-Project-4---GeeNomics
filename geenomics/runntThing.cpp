@@ -16,17 +16,20 @@ int main() {
 	matchBoi.addGenome(g1);
 	matchBoi.addGenome(g2);
 	matchBoi.addGenome(g3);
-	//result = matchBoi.findGenomesWithThisDNA("GAAG", 4, true, matches);
-	//result = matchBoi.findGenomesWithThisDNA("GAATAC", 4, true, matches);
-	//result = matchBoi.findGenomesWithThisDNA("GAATAC", 6, true, matches);
-	//result = matchBoi.findGenomesWithThisDNA("GAATAC", 6, false, matches);//one extra??
-	result = matchBoi.findGenomesWithThisDNA("GTATAT", 6, false, matches);
-	//result = matchBoi.findGenomesWithThisDNA("GAATACG", 6, false, matches); //OOF//one extra??
-	//result = matchBoi.findGenomesWithThisDNA("GAAGGGTT", 4, false, matches);
-	//result = matchBoi.findGenomesWithThisDNA("GAAGGGTT", 5, false, matches);
-	//result = matchBoi.findGenomesWithThisDNA("ACGTGCGAGACTTAGAGCC", 12, false, matches);
-	//result = matchBoi.findGenomesWithThisDNA("GAAG", 3, true, matches);
-	//result = matchBoi.findGenomesWithThisDNA("GAAG", 5, true, matches);
+	Genome g("testing related", "TAACAGAGCGGTNATATTGTTACGAATCACGTGCGAGACTTAGAGCCAGAATATGAA");
+	vector<GenomeMatch> results;
+	//matchBoi.findRelatedGenomes(g, 4, true, 10, results);
+	//result = matchBoi.findGenomesWithThisDNA("GAAG", 4, true, matches);//YE
+	//result = matchBoi.findGenomesWithThisDNA("GAATAC", 4, true, matches);//YE
+	//result = matchBoi.findGenomesWithThisDNA("GAATAC", 6, true, matches);//YE
+	//result = matchBoi.findGenomesWithThisDNA("GAATAC", 6, false, matches);//NAH
+	result = matchBoi.findGenomesWithThisDNA("GTATAT", 6, false, matches);//YE
+	//result = matchBoi.findGenomesWithThisDNA("GAATACG", 6, false, matches); //OOF//one extra??//NAH
+	//result = matchBoi.findGenomesWithThisDNA("GAAGGGTT", 4, false, matches);//uh close?
+	//result = matchBoi.findGenomesWithThisDNA("GAAGGGTT", 5, false, matches);//uh close?
+	//result = matchBoi.findGenomesWithThisDNA("ACGTGCGAGACTTAGAGCC", 12, false, matches);//NAH
+	//result = matchBoi.findGenomesWithThisDNA("GAAG", 3, true, matches);//YE
+	//result = matchBoi.findGenomesWithThisDNA("GAAG", 5, true, matches);//YE
 }
 
 
