@@ -20,12 +20,12 @@ private:
 	int m_minSearchLength;
 	vector<Genome> myGenomes;
 	Trie<DNAMatch> myTrie;
+	Genome findGenome(string nameToFind) const;
 };
 
 GenomeMatcherImpl::GenomeMatcherImpl(int minSearchLength)
 {
 	m_minSearchLength = minSearchLength;
-	// This compiles, but may not be correct
 }
 
 void GenomeMatcherImpl::addGenome(const Genome& genome)
@@ -46,9 +46,17 @@ void GenomeMatcherImpl::addGenome(const Genome& genome)
 
 int GenomeMatcherImpl::minimumSearchLength() const
 {
-	return m_minSearchLength;  // This compiles, but may not be correct
+	return m_minSearchLength;  
 }
 
+Genome GenomeMatcherImpl::findGenome(string nameToFind) const
+{
+	for (int i = 0; i < myGenomes.size(); i++) {
+		if (myGenomes[i].name() == nameToFind) {
+			return myGenomes[i];
+		}
+	}
+}
 
 bool GenomeMatcherImpl::findGenomesWithThisDNA(const string& fragment, int minimumLength, bool exactMatchOnly, vector<DNAMatch>& matches) const
 {
@@ -58,260 +66,112 @@ bool GenomeMatcherImpl::findGenomesWithThisDNA(const string& fragment, int minim
 	if (minimumLength < m_minSearchLength) {
 		return false;
 	}
-	vector<DNAMatch> possibleMatches;
-	//find a match from the start of the fragment
-	string firstSegment = fragment.substr(0, m_minSearchLength);
-	vector<DNAMatch> matchesToFirst = myTrie.find(firstSegment, exactMatchOnly);
-	vector<Genome> matchingGenomes;
-	vector<int> matchingPositions;
-	vector<string> matchingStrings;
-	if (!matchesToFirst.empty()) {
-		//std::cout << "we found "<< matchesToFirst.size()<<" matches!" << std::endl;
-		for (int i = 0; i < matchesToFirst.size(); i++) {
-			string nameToMatch = matchesToFirst[i].genomeName;
-			int posToMatch = matchesToFirst[i].position;
-			//cout << nameToMatch << " at pos " << posToMatch << endl;
-			for (int j = 0; j < myGenomes.size(); j++) {
-				if (myGenomes[j].name() == nameToMatch) {
-					matchingGenomes.push_back(myGenomes[j]);
-					matchingPositions.push_back(posToMatch);
+	string segmentToFind = fragment.substr(0, m_minSearchLength);
+	cout << segmentToFind << " is the segment to find" << endl;
+	vector<DNAMatch> foundSegments = myTrie.find(segmentToFind, exactMatchOnly);
+	std::cout << foundSegments.size() << " is the number of found things" << endl;
+	cout << foundSegments[0].genomeName <<" at pos "<<foundSegments[0].position<<endl;
+	vector<DNAMatch> longEnoughSegments;
+
+	for (int i = 0; i < foundSegments.size(); i++) {
+		cout << foundSegments[i].genomeName << " pos " << foundSegments[i].position << endl;
+	}
+
+
+	//for each possible match, calculate the length of the match to the fragment.
+	//if it's exactMatchOnly, numOff can only be 0. otherwise, it can be one
+	for (int i = 0; i < foundSegments.size(); i++) {
+		cout << i << " segments possible" << endl;
+		Genome matchingGenome = findGenome(foundSegments[i].genomeName);
+		//now that we've found a matching genome, find the segment in the genome
+		string toMatch = "";
+		int numMatching = 0;
+		int numOff = 0;
+		//this gets the string
+		//THIS IS A QUICK FIX!!! TODO: fix after fixing trie.find
+		//POSITIONS ARE CURRENTLY 1 OFF 
+		//ONLY OFF IF FALSE????
+		matchingGenome.extract(foundSegments[i].position, fragment.length(), toMatch);
+		//this gets the length of the segments which match (w one off if false) 
+		for (int j = 0; j < toMatch.length(); j++) {
+			if (fragment[j] == toMatch[j]) {
+				numMatching++;
+			}
+			else {
+				if (!exactMatchOnly) {
+					numOff++;
+					if (numOff > 1) {
+						break;
+					}
+					else {
+						numMatching++;
+					}
+				}
+				else {
+					//if it's an exactMatchOnly, one mistake --> you're out!
 					break;
 				}
 			}
 		}
-	}
-	else {
-		std::cout << "no matches found :(" << std::endl;
-	}
-	cout << "there are " << matchingGenomes.size() << " possible bois" << endl;
-	for (int i = 0; i < matchingGenomes.size(); i++) {
-		//for each genome, make a string for the length of the fragment 
-		string fragmentOfThis = "";
-		matchingGenomes[i].extract(matchingPositions[i], fragment.length(), fragmentOfThis);
-		//cout << fragmentOfThis << endl;
-		matchingStrings.push_back(fragmentOfThis);
-	}
-	//go thru the rest of the genome to see if it matches 
-	vector<DNAMatch> actualMatches;
-	for (int i = 0; i < matchingStrings.size(); i++) {
-		if (exactMatchOnly) {
-			if (matchingStrings[i] == fragment) {
-				//cout << "an exact match to the fragment has been found in " << matchingGenomes[i].name() << " at position " << matchingPositions[i] << endl;
-				//TODO::check for if a DNAmatch with the same genomeName exists already
-				bool alreadyExists = false;
-				int existingIndex = 0;
-				for (int h = 0; h < actualMatches.size(); h++) {
-					if (actualMatches[h].genomeName == matchesToFirst[i].genomeName) {
-						alreadyExists = true;
-						existingIndex = h;
-						//now, find lengths of tmhe genome for each. 
-						int existingLength = matchingStrings[h].length();
-						int newLength = fragment.length();
-						if (existingLength > newLength) {
-							//do not add the actual matches
-						}
-						else if(newLength>existingLength){
-							alreadyExists = true;
-							actualMatches.erase(actualMatches.begin() + h);
-							actualMatches.push_back(matchesToFirst[i]);
-							matchingStrings.erase(matchingStrings.begin() + h);
-						}
-						else {
-							alreadyExists = true;
-						}
-						break;
-					}
-					else {
-						h++;
-					}
-				}
-				if (!alreadyExists) {
-					actualMatches.push_back(matchesToFirst[i]);
-
-				}
-
-			}
-			else {
-				for (int k = 0; k < minimumLength; k++) {
-					if (matchingStrings[i][k] != fragment[k]) {
-						break;
-					}
-					if (k == minimumLength - 1) {
-						//check for if a DNAmatch with the same genomeName exists already
-						//TODO::
-						bool alreadyExists = false;
-						int indexOfExist = 0;
-						for (int p = 0; p < actualMatches.size(); p++) {
-							if (actualMatches[p].genomeName == matchesToFirst[i].genomeName) {
-								alreadyExists = true;
-								indexOfExist = p;
-							}
-						}
-						if (!alreadyExists) {
-							actualMatches.push_back(matchesToFirst[i]);
-						}
-						else {
-							//now, compare lengths.
-							int existingLength = 0;
-							int newLength = 0;
-
-							for (int g = 0; g < matchingStrings[indexOfExist].size(); g++) {
-								if (matchingStrings[indexOfExist][g] != fragment[g]) {
-									break;
-								}
-								else {
-									existingLength++;
-								}
-							}
-							for (int g = 0; g < matchingStrings[i].size(); g++) {
-								if (matchingStrings[i][g] != fragment[g]) {
-									break;
-								}
-								else {
-									newLength++;
-								}
-							}
-							if (newLength > existingLength) {
-								//replace the existing thing in actualMatches
-								actualMatches.erase(actualMatches.begin() + indexOfExist);
-								matchingStrings.erase(matchingStrings.begin() + indexOfExist);
-								actualMatches.push_back(matchesToFirst[i]);
-							}
-							else if (newLength < existingLength) {
-								//don't add it, do nothing
-							}
-						}
-
-					}
-				}
-			}
+		cout << toMatch << "num: "<<numMatching<<endl;
+		//if it's long enough, add it to the longEnoughSegments :) 
+		if (numMatching >= minimumLength) {
+			cout << "adding to the long enough segments" << endl;
+			foundSegments[i].length = numMatching;
+			longEnoughSegments.push_back(foundSegments[i]);
 		}
-		else {
-			//can only have one mismatch! if one or less, push to the actual matches
-			//else, don't push 
-			int numOff = 0;
-			string toPush = "";
-			//cout << matchingStrings[i] << endl;
-			//if fragmentOfThis is blank, that means there wasn't a long enough segment, so skip
-			for (int k = 0; k < fragment.length(); k++) {
-				if (matchingStrings[i] == "") {
-					numOff = 100;
-					continue;
+	}
+
+	cout << "BEFORE ERASING" << endl;
+	for (int i = 0; i < longEnoughSegments.size(); i++) {
+		cout << longEnoughSegments[i].genomeName << " at pos " << longEnoughSegments[i].position <<" with length " <<longEnoughSegments[i].length<< " is left" << endl;
+	}
+	//erase the smaller ones
+	for (int i = 0; i < longEnoughSegments.size(); i++) {
+		for (int k = i + 1; k < longEnoughSegments.size(); k++) {
+			if (longEnoughSegments[i].genomeName == longEnoughSegments[k].genomeName) {
+				if (longEnoughSegments[i].length > longEnoughSegments[k].length) {
+					longEnoughSegments.erase(longEnoughSegments.begin()+k);
 				}
-
-				if (fragment[k] != matchingStrings[i][k]) {
-					if (numOff == 1) {
-						break;
-					}
-					if (exactMatchOnly) {
-						break;
-					}
-					else {
-						numOff++;
-					}
-				}
-				toPush += matchingStrings[i][k];
-			}
-			if (numOff <= 1 && toPush.length() >= minimumLength) {
-				//std::cout << "adding to the actual matches " <<matchingStrings[i]<< endl;
-				
-				//TODO 				//check for if a DNAmatch with the same genomeName exists already
-				bool alreadyExists = false;
-				int indexOfExists = 0;
-				int indexInMatches = 0;
-				for (int p = 0; p < actualMatches.size(); p++) {
-					if (actualMatches[p].genomeName == matchesToFirst[i].genomeName) {
-						alreadyExists = true;
-						indexOfExists = p;
-					}
-					//cout << actualMatches[p].genomeName << endl;
-
-					//find the correct index in matchingStrings and matchingPositions
-					for (int y = 0; y < matchingStrings.size(); y++) {
-						if (matchesToFirst[y].genomeName == actualMatches[indexOfExists].genomeName && matchesToFirst[y].position == actualMatches[indexOfExists].position) {
-							indexInMatches = y;
-						}
-					}
-					//std::cout << "the index in the matches is " << indexInMatches << "______________________________" << endl;
-					//cout << "WHICH have the name " << matchesToFirst[indexInMatches].genomeName << " with position " << matchesToFirst[indexInMatches].position << endl;
-
-
-
-				}
-				if (!alreadyExists) {
-					actualMatches.push_back(matchesToFirst[i]);
+				else if (longEnoughSegments[i].length < longEnoughSegments[k].length) {
+					longEnoughSegments.erase(longEnoughSegments.begin() + i);
 				}
 				else {
-					//find the correct string to actually compare to??? 
-					//first, find the right genome by name
-					//then, extract the string of fragment length? 
-					
-					//something already exists, so let's check lengths! 
-					int existingLength = 0;
-					int newLength = 0;
-					//this is not actually right, we need to use the correct matchingStrings 
-					//find which of the matchingStrings has the correct genome??? 
-					for (int h = 0; h < matchingStrings[indexInMatches].length(); h++) {
-						if (matchingStrings[indexInMatches][h] != fragment[h]) {
-							break;
-						}
-						else {
-							existingLength++;
-						}
-					}
-					int off = 0;
-					for (int h = 0; h < matchingStrings[i].length(); h++) {
-						if (matchingStrings[i][h] != fragment[h]) {
-							if (off == 1) {
-								break;
-							}
-							off++;
-							//break;
-						}
-						else {
-							newLength++;
-						}
-					}
-					if (actualMatches[indexOfExists].genomeName == "Genome 3") {
-						cout << "the total length was " << matchingStrings[i].length() << " with a string of " << matchingStrings[i] << endl;
-						cout << "existing length is " << existingLength << endl;
-						cout << "new length is " << newLength << endl;
-					}
-					//cout << "existing length is " << existingLength << endl;
-					//cout << "new length is " << newLength << endl;
-					if (newLength > existingLength && newLength >= minimumLength) {
-						//erase!
-						
-						actualMatches.erase(actualMatches.begin() + indexOfExists);
-						matchingStrings.erase(matchingStrings.begin() + indexInMatches);
-						actualMatches.push_back(matchesToFirst[i]);
-						//i = 0;
+					if (longEnoughSegments[i].position > longEnoughSegments[k].position) {
+						longEnoughSegments.erase(longEnoughSegments.begin() + i);
 					}
 					else {
-						//do not insert
+						longEnoughSegments.erase(longEnoughSegments.begin() + k);
 					}
 				}
-			}
-			else {
-				cout << matchingStrings[i] << " is too diff from \n" << fragment << endl;
+				i = 0;
+				k = 1;
 			}
 		}
 	}
-	cout << actualMatches.size() << " actual matches" << endl;
-	for (int i = 0; i < actualMatches.size(); i++) {
-		cout << actualMatches[i].genomeName << " at " << actualMatches[i].position << endl;
+	if (longEnoughSegments.size() == 2) {
+		if (longEnoughSegments[0].genomeName == longEnoughSegments[1].genomeName) {
+			if (longEnoughSegments[0].length > longEnoughSegments[1].length) {
+				longEnoughSegments.erase(longEnoughSegments.begin() + 1);
+			}
+			else {
+				longEnoughSegments.erase(longEnoughSegments.begin() + 0);
+			}
+
+		}
 	}
-	if (actualMatches.size() == 0) {
-		cout << "ouch. no matches. what a rough time" << endl;
+	cout << "POST ERASING" << endl;
+	for (int i = 0; i < longEnoughSegments.size(); i++) {
+		cout << longEnoughSegments[i].genomeName << " at pos " << longEnoughSegments[i].position << " is left" << endl;
+	}
+
+	matches = longEnoughSegments;
+	//if we've found at least one match, return true :) 
+	if (matches.empty()) {
+		cout << "aw no matches" << endl;
 		return false;
 	}
-	else {
-		matches.push_back(actualMatches[0]);
-		return true;
-	}
-	//now, go thru each string to see if it's an exact match.
-	//if it's an exact match, hooray! if it's off by one, use exactMatchOnly 
-	//return false;  // This compiles, but may not be correct
+	return true; 
 }
 bool isGreaterThan(const GenomeMatch g1, const GenomeMatch g2)
 {
@@ -377,6 +237,7 @@ bool GenomeMatcherImpl::findRelatedGenomes(const Genome& query, int fragmentMatc
 	}
 	return false;  // This compiles, but may not be correct
 }
+
 
 
 

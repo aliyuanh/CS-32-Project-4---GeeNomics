@@ -95,9 +95,7 @@ void Trie<ValueType>::insert(const std::string & key, const ValueType & value)
 {
 	Node* temp = root;
 	for (int i = 0; i < key.length(); i++) {
-		//std::cout << "goin thru "<<std::endl;
 		if (!nodeExists(temp, key[i])) {
-			//std::cout << "makin a new noderoo" << std::endl;
 			Node* newBoi = new Node;
 			newBoi->label = key[i];
 			temp->kids.push_back(newBoi);
@@ -119,8 +117,10 @@ void Trie<ValueType>::insert(const std::string & key, const ValueType & value)
 template<typename ValueType>
 std::vector<ValueType> Trie<ValueType>::find(const std::string & key, bool exactMatchOnly) const
 {
+	std::cout << key << std::endl;
 	//BUG: if exactMatchOnly is true AND there is an exact match, it makes duplicates :( 
 	//TODO 
+	//this returns things that are OFF BY ONE NODE HOLY SHIT 
 	Node* temp = root;
 	std::vector<ValueType> toReturn;
 	for (int i = 0; i < key.length(); i++) {
@@ -128,20 +128,21 @@ std::vector<ValueType> Trie<ValueType>::find(const std::string & key, bool exact
 			for (int j = 0; j < temp->kids.size(); j++) {
 				if (temp->kids[j]->label == key[i]) {
 					temp = temp->kids[j];
-					//std::cout << key[i] << " matches" << std::endl;
+					break;
 				}
 				else {
 					if (!exactMatchOnly) {
 						std::vector<ValueType> extra;
+						if (i == 0) {
+							continue;
+						}
 						for (int k = 0; k < temp->kids.size(); k++) {
 							if (k == j) {
 								continue;
 							}
-							//std::cout << "checking alternates: " << key.substr(0, i) + temp->kids[k]->label + key.substr(i + 1)<<std::endl;
 							extra = find(key.substr(0, i) + temp->kids[k]->label + key.substr(i + 1), true);
 							if (!extra.empty()) {
 								for (int r = 0; r < extra.size(); r++) {
-									//std::cout << "adding an extra!" << std::endl;
 									toReturn.push_back(extra[r]);
 								}
 							}
@@ -159,10 +160,11 @@ std::vector<ValueType> Trie<ValueType>::find(const std::string & key, bool exact
 				if (i == 0) {
 					return toReturn;
 				}
+				//there's something wrong with this that causes everything to be off by one :( 
 				std::vector<ValueType> fromKids;
 				for (int j = 0; j < temp->kids.size(); j++) {
 					//does not work if at the end 
-					std::cout << "alternate: " << std::endl;
+					//std::cout << "alternate: " << std::endl;
 					std::cout << key.substr(0, i) << temp->kids[j]->label << key.substr(i + 1) << std::endl;
 					//if the key is off by one, test all its children paths with an exact match while replacing that character 
 					fromKids = find(key.substr(0, i) + temp->kids[j]->label + key.substr(i + 1), true);
@@ -184,16 +186,7 @@ std::vector<ValueType> Trie<ValueType>::find(const std::string & key, bool exact
 	for (typename std::list<ValueType>::iterator cry = temp->valsToStore.begin(); cry != temp->valsToStore.end(); cry++) {
 		toReturn.push_back(*cry);
 	}
-	//now, get rid of duplicates
-	//for (int p = 1; p < toReturn.size(); p++) {
-		//std::cout << "gettin rid of dupes" << std::endl;
-		
-	//}
-
-	//make a vector of names
-	//make a vector of corresponding positions
-
-	//std::cout << "there are " << toReturn.size() << " total matches" << std::endl;
+	
 	return toReturn;
 }
 #endif // TRIE_INCLUDED
