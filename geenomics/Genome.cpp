@@ -78,7 +78,6 @@ bool GenomeImpl::load(istream& genomeSource, vector<Genome>& genomes)
 	}
 	Genome myGenome(name, seq);
 	genomes.push_back(myGenome);
-	//std::cout << genomes.size() << std::endl;
 
 	return true;  // This compiles, but may not be correct
 }
@@ -96,11 +95,9 @@ string GenomeImpl::name() const
 bool GenomeImpl::extract(int position, int length, string& fragment) const
 {
 	if (position + length > GenomeImpl::length()) {
-		cout << "too long of a thing to extract :(" << endl;
 		return false;
 	}
 	fragment = m_sequence.substr(position, length);
-	//cout << fragment << " is my fragment"<< endl;
 	return true;  // This compiles, but may not be correct
 }
 

@@ -56,6 +56,8 @@ Genome GenomeMatcherImpl::findGenome(string nameToFind) const
 			return myGenomes[i];
 		}
 	}
+	Genome a("Nonsense", "");
+	return a;
 }
 
 bool GenomeMatcherImpl::findGenomesWithThisDNA(const string& fragment, int minimumLength, bool exactMatchOnly, vector<DNAMatch>& matches) const
@@ -67,33 +69,23 @@ bool GenomeMatcherImpl::findGenomesWithThisDNA(const string& fragment, int minim
 		return false;
 	}
 	string segmentToFind = fragment.substr(0, m_minSearchLength);
-	cout << segmentToFind << " is the segment to find" << endl;
 	vector<DNAMatch> foundSegments = myTrie.find(segmentToFind, exactMatchOnly);
-	std::cout << foundSegments.size() << " is the number of found things" << endl;
-	cout << foundSegments[0].genomeName <<" at pos "<<foundSegments[0].position<<endl;
 	vector<DNAMatch> longEnoughSegments;
-
-	for (int i = 0; i < foundSegments.size(); i++) {
-		cout << foundSegments[i].genomeName << " pos " << foundSegments[i].position << endl;
-	}
-
 
 	//for each possible match, calculate the length of the match to the fragment.
 	//if it's exactMatchOnly, numOff can only be 0. otherwise, it can be one
 	for (int i = 0; i < foundSegments.size(); i++) {
-		cout << i << " segments possible" << endl;
 		Genome matchingGenome = findGenome(foundSegments[i].genomeName);
 		//now that we've found a matching genome, find the segment in the genome
 		string toMatch = "";
 		int numMatching = 0;
 		int numOff = 0;
 		//this gets the string
-		//THIS IS A QUICK FIX!!! TODO: fix after fixing trie.find
-		//POSITIONS ARE CURRENTLY 1 OFF 
-		//ONLY OFF IF FALSE????
 		matchingGenome.extract(foundSegments[i].position, fragment.length(), toMatch);
 		//this gets the length of the segments which match (w one off if false) 
 		for (int j = 0; j < toMatch.length(); j++) {
+			//if it's exactMatchOnly, no mismatches! 
+			//otherwise, keep going until there's another mismatch 
 			if (fragment[j] == toMatch[j]) {
 				numMatching++;
 			}
@@ -113,23 +105,19 @@ bool GenomeMatcherImpl::findGenomesWithThisDNA(const string& fragment, int minim
 				}
 			}
 		}
-		cout << toMatch << "num: "<<numMatching<<endl;
 		//if it's long enough, add it to the longEnoughSegments :) 
 		if (numMatching >= minimumLength) {
-			cout << "adding to the long enough segments" << endl;
 			foundSegments[i].length = numMatching;
 			longEnoughSegments.push_back(foundSegments[i]);
 		}
 	}
 
-	cout << "BEFORE ERASING" << endl;
-	for (int i = 0; i < longEnoughSegments.size(); i++) {
-		cout << longEnoughSegments[i].genomeName << " at pos " << longEnoughSegments[i].position <<" with length " <<longEnoughSegments[i].length<< " is left" << endl;
-	}
-	//erase the smaller ones
+	//The above process doesn't care about duplicates :( so, this eliminates them!
+	//this loops thru the whole longEnoughSegments and erases ONLY if names are shared
 	for (int i = 0; i < longEnoughSegments.size(); i++) {
 		for (int k = i + 1; k < longEnoughSegments.size(); k++) {
 			if (longEnoughSegments[i].genomeName == longEnoughSegments[k].genomeName) {
+				//eliminates the one with the shorter length
 				if (longEnoughSegments[i].length > longEnoughSegments[k].length) {
 					longEnoughSegments.erase(longEnoughSegments.begin()+k);
 				}
@@ -137,6 +125,7 @@ bool GenomeMatcherImpl::findGenomesWithThisDNA(const string& fragment, int minim
 					longEnoughSegments.erase(longEnoughSegments.begin() + i);
 				}
 				else {
+					//if they're the same length, erase the one farther in 
 					if (longEnoughSegments[i].position > longEnoughSegments[k].position) {
 						longEnoughSegments.erase(longEnoughSegments.begin() + i);
 					}
@@ -144,11 +133,14 @@ bool GenomeMatcherImpl::findGenomesWithThisDNA(const string& fragment, int minim
 						longEnoughSegments.erase(longEnoughSegments.begin() + k);
 					}
 				}
+				//revalidate the vector 
 				i = 0;
 				k = 1;
 			}
 		}
 	}
+	//sometimes, the above process doesn't check if there are 2 genomes left and they're of the same name
+	//this is just a quick check and erases the one with the shorter length 
 	if (longEnoughSegments.size() == 2) {
 		if (longEnoughSegments[0].genomeName == longEnoughSegments[1].genomeName) {
 			if (longEnoughSegments[0].length > longEnoughSegments[1].length) {
@@ -160,32 +152,35 @@ bool GenomeMatcherImpl::findGenomesWithThisDNA(const string& fragment, int minim
 
 		}
 	}
-	cout << "POST ERASING" << endl;
-	for (int i = 0; i < longEnoughSegments.size(); i++) {
-		cout << longEnoughSegments[i].genomeName << " at pos " << longEnoughSegments[i].position << " is left" << endl;
-	}
-
+	//sets matches to the filtered results 
 	matches = longEnoughSegments;
 	//if we've found at least one match, return true :) 
 	if (matches.empty()) {
-		cout << "aw no matches" << endl;
+		//if there were no matches, return false :( 
 		return false;
 	}
+	//there were matches!
 	return true; 
 }
 bool isGreaterThan(const GenomeMatch g1, const GenomeMatch g2)
 {
 	if (g1.percentMatch > g2.percentMatch) {
-		cout << "sortin" << endl;
 		return true;
 	}
-	else {
+	else if(g2.percentMatch > g1.percentMatch){
 		return false;
+	}
+	else {
+		if (g1.genomeName < g2.genomeName) {
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 }
 bool GenomeMatcherImpl::findRelatedGenomes(const Genome& query, int fragmentMatchLength, bool exactMatchOnly, double matchPercentThreshold, vector<GenomeMatch>& results) const
 {
-	cout << "in find related genomes" << endl;
 	if (fragmentMatchLength < m_minSearchLength) {
 		return false;
 	}
@@ -194,12 +189,14 @@ bool GenomeMatcherImpl::findRelatedGenomes(const Genome& query, int fragmentMatc
 	for (int i = 0; i < myGenomes.size(); i++) {
 		toReturn[i].genomeName = myGenomes[i].name();
 	}
-	int numMatches = 0;
+	//get DNAMatches from findGenomesWithDNA
 	vector<DNAMatch> fromHelper;
 	int numIterations = query.length() / fragmentMatchLength;
 	for (int i = 0; i < numIterations; i++) {
 		string help;
 		query.extract(i*fragmentMatchLength, fragmentMatchLength, help);
+		//clear any content that may be left in fromHelper in a previous loop 
+		fromHelper.clear();
 		if (findGenomesWithThisDNA(help, fragmentMatchLength, exactMatchOnly, fromHelper)) {
 			//increment each toReturn genomeMatch if it's in fromHelper
 			for (int j = 0; j < fromHelper.size(); j++) {
@@ -207,31 +204,31 @@ bool GenomeMatcherImpl::findRelatedGenomes(const Genome& query, int fragmentMatc
 				for (int k = 0; k < toReturn.size(); k++) {
 					if (toReturn[k].genomeName == fromHelper[j].genomeName) {
 						toReturn[k].percentMatch++;
-						numMatches++;
 					}
 				}
 			}
 		}
 	}
-	cout << "num of matches per genome" << endl;
-	for (int i = 0; i < toReturn.size(); i++) {
-		cout << toReturn[i].genomeName << " with " << toReturn[i].percentMatch << " matches." << endl;
-	}
+	//now, filter these results by percentage. 
 	vector<GenomeMatch> atLeastOnce;
 	for (int i = 0; i < toReturn.size(); i++) {
 		if (toReturn[i].percentMatch > 0) {
+			//makes a new GenomeMatch, computes the percentage, and adds it only if it goes over the threshold
 			GenomeMatch* yuh = new GenomeMatch;
 			yuh->genomeName = toReturn[i].genomeName;
 			yuh->percentMatch = 100*(toReturn[i].percentMatch / numIterations);
-			atLeastOnce.push_back(*yuh);
+			if (yuh->percentMatch >= matchPercentThreshold) {
+				atLeastOnce.push_back(*yuh);
+			}
+			else {
+				delete yuh;
+			}
 		}
 	}
+	//sorts into descending order of percentage match 
 	sort(atLeastOnce.begin(), atLeastOnce.end(), isGreaterThan);
-	for (int i = 0; i < atLeastOnce.size(); i++) {
-		cout << atLeastOnce[i].genomeName << " with the percent " << atLeastOnce[i].percentMatch << endl;
-	}
-
-	if (numMatches > 0) {
+	//if it's matched at least once, return true
+	if (atLeastOnce.size() > 0) {
 		results = atLeastOnce;
 		return true;
 	}

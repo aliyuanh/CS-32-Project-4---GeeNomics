@@ -32,16 +32,12 @@ private:
 
 template<typename ValueType>
 Trie<ValueType>::Trie() {
-	//std::cout << "making a Trie" << std::endl;
 	root = new Node;
 }
 
 template<typename ValueType>
 Trie<ValueType>::~Trie() {
-	//printTrie(root);
 	freeTree(root);
-	//printTrie(root);
-	//std::cout << "gettin ridda a Trie" << std::endl;
 }
 template<typename ValueType>
 void Trie<ValueType>::reset() {
@@ -94,6 +90,7 @@ template<typename ValueType>
 void Trie<ValueType>::insert(const std::string & key, const ValueType & value)
 {
 	Node* temp = root;
+	//if temp doesn't have a child with the current char, make that child
 	for (int i = 0; i < key.length(); i++) {
 		if (!nodeExists(temp, key[i])) {
 			Node* newBoi = new Node;
@@ -102,6 +99,7 @@ void Trie<ValueType>::insert(const std::string & key, const ValueType & value)
 			temp = newBoi;
 		}
 		else {
+			//otherwise, move along that char 
 			Node *it = temp;
 			for (int j = 0; j < temp->kids.size(); j++) {
 				if (temp->kids[j]->label == key[i]) {
@@ -111,16 +109,13 @@ void Trie<ValueType>::insert(const std::string & key, const ValueType & value)
 			temp = it;
 		}
 	}
+	//put the value to store at the branch of the trie
 	temp->valsToStore.push_back(value);
 }
 
 template<typename ValueType>
 std::vector<ValueType> Trie<ValueType>::find(const std::string & key, bool exactMatchOnly) const
 {
-	std::cout << key << std::endl;
-	//BUG: if exactMatchOnly is true AND there is an exact match, it makes duplicates :( 
-	//TODO 
-	//this returns things that are OFF BY ONE NODE HOLY SHIT 
 	Node* temp = root;
 	std::vector<ValueType> toReturn;
 	for (int i = 0; i < key.length(); i++) {
@@ -160,17 +155,11 @@ std::vector<ValueType> Trie<ValueType>::find(const std::string & key, bool exact
 				if (i == 0) {
 					return toReturn;
 				}
-				//there's something wrong with this that causes everything to be off by one :( 
 				std::vector<ValueType> fromKids;
 				for (int j = 0; j < temp->kids.size(); j++) {
-					//does not work if at the end 
-					//std::cout << "alternate: " << std::endl;
-					std::cout << key.substr(0, i) << temp->kids[j]->label << key.substr(i + 1) << std::endl;
 					//if the key is off by one, test all its children paths with an exact match while replacing that character 
 					fromKids = find(key.substr(0, i) + temp->kids[j]->label + key.substr(i + 1), true);
 					if (!fromKids.empty()) {
-						//std::cout << "is not empty!" << std::endl;
-						//toReturn = fromKids;
 						for (int f = 0; f < fromKids.size(); f++) {
 							toReturn.push_back(fromKids[f]);
 						}

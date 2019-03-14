@@ -1,4 +1,4 @@
-#include "Trie.h"
+/*#include "Trie.h"
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -12,29 +12,32 @@ int main() {
 	Genome g1("Genome 1", "CGGTGTACNACGACTGGGGATAGAATATCTTGACGTCGTACCGGTTGTAGTCGTTCGACCGAAGGGTTCCGCGCCAGTAC");
 	Genome g2("Genome 2", "TAACAGAGCGGTNATATTGTTACGAATCACGTGCGAGACTTAGAGCCAGAATATGAAGTAGTGATTCAGCAACCAAGCGG");
 	Genome g3("Genome 3", "TTTTGAGCCAGCGACGCGGCTTGCTTAACGAAGCGGAAGAGTAGGTTGGACACATTNGGCGGCACAGCGCTTTTGAGCCA");
+	Genome g4("Genome 4", "CGGTGTACNACGACTGGGGATAGAATATCTTGACGTCGTACCGGTTGTAGTCGTTCGACCGAAGGGTTCCGCGCCAGTAC");
 	GenomeMatcher matchBoi(4);
 	matchBoi.addGenome(g1);
-	matchBoi.addGenome(g2);
-	matchBoi.addGenome(g3);
+	//matchBoi.addGenome(g2);
+	//matchBoi.addGenome(g3);
+	matchBoi.addGenome(g4);
 	Genome g("testing related", "TAACAGAGCGGTNATATTGTTACGAATCACGTGCGAGACTTAGAGCCAGAATATGAA");
 	vector<GenomeMatch> results;
-	//matchBoi.findRelatedGenomes(g, 4, true, 10, results);
+	matchBoi.findRelatedGenomes(g, 4, true, 30, results);
 	//result = matchBoi.findGenomesWithThisDNA("GAAG", 4, true, matches);//YE
 	//result = matchBoi.findGenomesWithThisDNA("GAATAC", 4, true, matches);//YE
 	//result = matchBoi.findGenomesWithThisDNA("GAATAC", 6, true, matches);//YE
-	//result = matchBoi.findGenomesWithThisDNA("GAATAC", 6, false, matches);//oof
+	//result = matchBoi.findGenomesWithThisDNA("GAATAC", 6, false, matches);//YE
 	//result = matchBoi.findGenomesWithThisDNA("GTATAT", 6, false, matches);//YE
 	//result = matchBoi.findGenomesWithThisDNA("GAATACG", 6, false, matches); //YE
-	//result = matchBoi.findGenomesWithThisDNA("GAAGGGTT", 5, false, matches);
-	//result = matchBoi.findGenomesWithThisDNA("GAAGGGTT", 6, false, matches);
-	//result = matchBoi.findGenomesWithThisDNA("ACGTGCGAGACTTAGAGCC", 12, false, matches);//NAH
-	result = matchBoi.findGenomesWithThisDNA("ACGTGCGAGACTTAGAGCG", 12, false, matches);
+	//result = matchBoi.findGenomesWithThisDNA("GAAGGGTT", 5, false, matches);//YE
+	//result = matchBoi.findGenomesWithThisDNA("GAAGGGTT", 6, false, matches);//YE
+	//result = matchBoi.findGenomesWithThisDNA("ACGTGCGAGACTTAGAGCC", 12, false, matches);//YE
+	//result = matchBoi.findGenomesWithThisDNA("ACGTGCGAGACTTAGAGCG", 12, false, matches);//YE
+
 	//result = matchBoi.findGenomesWithThisDNA("GAAG", 3, true, matches);//YE
 	//result = matchBoi.findGenomesWithThisDNA("GAAG", 5, true, matches);//YE
 
 	//MY TEST CASES
-	//result = matchBoi.findGenomesWithThisDNA("TAAC", 4, false, matches);
-}
+	//result = matchBoi.findGenomesWithThisDNA("TAAC", 4, false, matches);//YE
+}*/
 
 
 /*
@@ -152,7 +155,7 @@ int main() {
 	return 0;
 }
 */
-/*
+
 #include "provided.h"
 #include <iostream>
 #include <iomanip>
@@ -470,4 +473,3 @@ int main()
 		}
 	}
 }
-*/
